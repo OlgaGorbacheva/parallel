@@ -3,9 +3,9 @@
 #include <stdlib.h> 
 #include <pthread.h>
 
-#define PTHR_NUM 4
+#define PTHR_NUM 8
 
-int n = 5, m = 5;
+int n = 1000, m = 100;
 int **a;
 
 void * max_for_thr(void *_num) {
@@ -24,6 +24,9 @@ void * max_for_thr(void *_num) {
 }
 
 int main(int argc, char *argv[]) {
+//	struct timespec begin, end;
+	clock_t t;
+	double elapsed;
 	a = malloc (n * sizeof(int*));
 	if (a == NULL) {
 		printf("Error: bad allocation\n");
@@ -46,6 +49,8 @@ int main(int argc, char *argv[]) {
 	int max_el[PTHR_NUM];
 	int num[PTHR_NUM];
 	int max_i = 0;
+	//clock_gettime(CLOCK_REALTIME, &begin);
+//	t = clock();
 	for (int i = 0; i < PTHR_NUM; i++) {
 		num[i] = i;
 		int rc = pthread_create(&(pthr[i]), NULL, max_for_thr, (void*) (&num[i]));
@@ -55,6 +60,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	void *ret;
+	t = clock();
 	for (int i = 0; i < PTHR_NUM; i++) {
 		int rc = pthread_join(pthr[i], &ret);
 		if (ret == NULL) {
@@ -66,17 +72,21 @@ int main(int argc, char *argv[]) {
                         printf("Error: return code from pthread_join(): %d\n", rc);
                         return rc;
                 }
-		printf ("%d\n", max_el[i]);
-		if (i != 0 && max_el[i] > max_el[max_i])
-			max_i = i; 
+//		printf ("%d\n", max_el[i]);
+//		if (i != 0 && max_el[i] > max_el[max_i])
+//			max_i = i; 
 	}
-	printf("max: %d\n\n\n", max_el[max_i]);
-	for (int i = 0; i < n; i++) {
+//	clock_gettime(CLOCK_REALTIME, &end);
+	t = clock() - t;
+//	elapsed = end.tv_sec - begin.tv_sec;
+	printf("%f\n", (float)t/CLOCKS_PER_SEC);
+//	printf("max: %d\n\n\n", max_el[max_i]);
+/*	for (int i = 0; i < n; i++) {
                 for (int j = 0; j < m; j++) {
                         printf("%d ", a[i][j]);
                 }
 		printf("\n");
-        }
+        }*/
 	for (int i = 0; i < n; i++) {
 		free(a[i]);
 	}
