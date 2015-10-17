@@ -1,11 +1,12 @@
+
 #include <stdio.h> 
 #include <time.h> 
 #include <stdlib.h> 
 #include <pthread.h>
 
-#define PTHR_NUM 8
+#define PTHR_NUM 12
 
-int n = 1000, m = 100;
+int n = 10000, m = 1000;
 int **a;
 
 void * max_for_thr(void *_num) {
@@ -25,6 +26,7 @@ void * max_for_thr(void *_num) {
 
 int main(int argc, char *argv[]) {
 //	struct timespec begin, end;
+	FILE *f = fopen("output.txt", "r");
 	clock_t t;
 	double elapsed;
 	a = malloc (n * sizeof(int*));
@@ -39,10 +41,10 @@ int main(int argc, char *argv[]) {
                 	return -1;
         	}
 	}
-	srand(time(NULL));
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < m; j++) {
-			a[i][j] = rand() % (n*m);
+//			a[i][j] = rand() % (m *n + 1);
+			fscanf(f, "%d", &a[i][j]);
 		}
 	}
 	pthread_t pthr[PTHR_NUM];
@@ -50,7 +52,7 @@ int main(int argc, char *argv[]) {
 	int num[PTHR_NUM];
 	int max_i = 0;
 	//clock_gettime(CLOCK_REALTIME, &begin);
-//	t = clock();
+	t = clock();
 	for (int i = 0; i < PTHR_NUM; i++) {
 		num[i] = i;
 		int rc = pthread_create(&(pthr[i]), NULL, max_for_thr, (void*) (&num[i]));
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	void *ret;
-	t = clock();
+//	t = clock();
 	for (int i = 0; i < PTHR_NUM; i++) {
 		int rc = pthread_join(pthr[i], &ret);
 		if (ret == NULL) {
@@ -73,8 +75,8 @@ int main(int argc, char *argv[]) {
                         return rc;
                 }
 //		printf ("%d\n", max_el[i]);
-//		if (i != 0 && max_el[i] > max_el[max_i])
-//			max_i = i; 
+		if (i != 0 && max_el[i] > max_el[max_i])
+			max_i = i;
 	}
 //	clock_gettime(CLOCK_REALTIME, &end);
 	t = clock() - t;
